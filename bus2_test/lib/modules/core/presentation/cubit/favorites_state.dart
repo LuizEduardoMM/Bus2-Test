@@ -18,7 +18,6 @@ class FavoritesError extends FavoritesState {
 }
 
 class FavoritesSuccess extends FavoritesState {
-  // Guardamos as duas listas
   final List<User> allFavorites;
   final List<User> filteredFavorites;
 
