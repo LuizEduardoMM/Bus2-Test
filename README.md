@@ -52,7 +52,7 @@ lib/
 ### Instalação
 ```bash
 # Clone o repositório
-git clone https://github.com/seu-usuario/bus2_test.git
+git clone https://github.com/LuizEduardoMM/bus2_test.git
 cd bus2_test
 
 # Instale dependências
