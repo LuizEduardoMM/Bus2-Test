@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/presentation/theme/app_sizes.dart';
+import '../../../core/presentation/theme/app_text_styles.dart';
+
 class InfoRow extends StatelessWidget {
   final String label;
   final String value;
@@ -8,20 +11,19 @@ class InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      padding: infoRowPadding,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
-          ),
-          const SizedBox(width: 8),
+          Text(label, style: AppTextStyles.getInfoLabelStyle(textTheme)),
+          gapW8,
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(color: Colors.black87),
+              style: AppTextStyles.getInfoValueStyle(textTheme),
               overflow: TextOverflow.ellipsis,
               maxLines: 2,
             ),

@@ -9,22 +9,28 @@ abstract class FavoritesState extends Equatable {
 
 class FavoritesInitial extends FavoritesState {}
 
-class FavoritesLoading extends FavoritesState {}
-
-class FavoritesSuccess extends FavoritesState {
-  final List<User> favorites;
-
-  const FavoritesSuccess(this.favorites);
-
-  @override
-  List<Object> get props => [favorites];
-}
-
 class FavoritesError extends FavoritesState {
   final String message;
-
   const FavoritesError(this.message);
 
   @override
   List<Object> get props => [message];
+}
+
+class FavoritesSuccess extends FavoritesState {
+  // Guardamos as duas listas
+  final List<User> allFavorites;
+  final List<User> filteredFavorites;
+
+  const FavoritesSuccess({required this.allFavorites, required this.filteredFavorites});
+
+  @override
+  List<Object> get props => [allFavorites, filteredFavorites];
+
+  FavoritesSuccess copyWith({List<User>? allFavorites, List<User>? filteredFavorites}) {
+    return FavoritesSuccess(
+      allFavorites: allFavorites ?? this.allFavorites,
+      filteredFavorites: filteredFavorites ?? this.filteredFavorites,
+    );
+  }
 }
