@@ -61,8 +61,23 @@ class _DetailsPageState extends State<DetailsPage> with TickerProviderStateMixin
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
+    Widget avatar = Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 24, offset: const Offset(0, 12))],
+      ),
+      child: CircleAvatar(
+        radius: avatarRadius,
+        backgroundColor: AppColors.avatarBackground,
+        backgroundImage: NetworkImage(widget.user.pictureLarge),
+      ),
+    );
+
+    if (widget.heroTag != null) {
+      avatar = Hero(tag: widget.heroTag!, child: avatar);
+    }
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -99,7 +114,6 @@ class _DetailsPageState extends State<DetailsPage> with TickerProviderStateMixin
           ),
         ],
       ),
-
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -117,8 +131,8 @@ class _DetailsPageState extends State<DetailsPage> with TickerProviderStateMixin
                 child: SlideTransition(
                   position: _slideAnimation,
                   child: orientation == Orientation.portrait
-                      ? _buildPortraitLayout(context)
-                      : _buildLandscapeLayout(context),
+                      ? _buildPortraitLayout(context, avatar)
+                      : _buildLandscapeLayout(context, avatar),
                 ),
               );
             },
@@ -128,91 +142,54 @@ class _DetailsPageState extends State<DetailsPage> with TickerProviderStateMixin
     );
   }
 
-  Widget _buildPortraitLayout(BuildContext context) {
+  Widget _buildPortraitLayout(BuildContext context, Widget avatar) {
     final textTheme = Theme.of(context).textTheme;
 
-    Widget avatar = Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 24, offset: const Offset(0, 12))],
-      ),
-      child: CircleAvatar(
-        radius: avatarRadius,
-        backgroundColor: AppColors.avatarBackground,
-        backgroundImage: NetworkImage(widget.user.pictureLarge),
-      ),
-    );
-
-    if (widget.heroTag != null) {
-      avatar = Hero(tag: widget.heroTag!, child: avatar);
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: Padding(
-              padding: pagePadding,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  avatar,
-                  gapH28,
-                  Text(
-                    '${widget.user.firstName} ${widget.user.lastName}',
-                    style: AppTextStyles.getHeadlineDetails(textTheme),
-                    textAlign: TextAlign.center,
-                  ),
-                  gapH12,
-                  _buildGenderAgeBadge(context),
-                  const Spacer(),
-                  gapH32,
-                  _buildInfoSections(),
-                ],
-              ),
-            ),
+    return SingleChildScrollView(
+      padding: pagePadding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          avatar,
+          gapH28,
+          Text(
+            '${widget.user.firstName} ${widget.user.lastName}',
+            style: AppTextStyles.getHeadlineDetails(textTheme),
+            textAlign: TextAlign.center,
           ),
-        );
-      },
+          gapH12,
+          _buildGenderAgeBadge(context),
+          gapH32,
+          _buildInfoSections(),
+        ],
+      ),
     );
   }
 
-  Widget _buildLandscapeLayout(BuildContext context) {
+  Widget _buildLandscapeLayout(BuildContext context, Widget avatar) {
     final textTheme = Theme.of(context).textTheme;
 
-    Widget avatar = Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 24, offset: const Offset(0, 12))],
-      ),
-      child: CircleAvatar(
-        radius: avatarRadiusLandscape,
-        backgroundColor: AppColors.avatarBackground,
-        backgroundImage: NetworkImage(widget.user.pictureLarge),
-      ),
-    );
-
-    if (widget.heroTag != null) {
-      avatar = Hero(tag: widget.heroTag!, child: avatar);
-    }
-
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           flex: 2,
-          child: Padding(
+          child: SingleChildScrollView(
             padding: pagePadding,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                avatar,
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.4),
+                  child: avatar,
+                ),
                 gapH16,
                 Text(
                   '${widget.user.firstName} ${widget.user.lastName}',
                   style: AppTextStyles.getHeadlineDetails(textTheme),
                   textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 gapH8,
                 _buildGenderAgeBadge(context),

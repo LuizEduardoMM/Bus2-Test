@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/domain/entities/user.dart';
+import '../../../core/injection/injection.dart';
 import '../../../core/presentation/cubit/favorites_cubit.dart';
 import '../../../core/presentation/theme/app_colors.dart';
 import '../../../core/presentation/theme/app_sizes.dart';
@@ -19,17 +20,20 @@ class PersistedUsersPage extends StatefulWidget {
 
 class _PersistedUsersPageState extends State<PersistedUsersPage> {
   final _searchController = TextEditingController();
+  final FavoritesCubit _favoritesCubit = getIt<FavoritesCubit>();
 
   @override
   void initState() {
     super.initState();
-    context.read<FavoritesCubit>().loadFavorites();
+    _favoritesCubit.loadFavorites();
     _searchController.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
+    _favoritesCubit.resetSearch();
     _searchController.dispose();
+
     super.dispose();
   }
 
@@ -53,7 +57,7 @@ class _PersistedUsersPageState extends State<PersistedUsersPage> {
                 child: SearchField(
                   controller: _searchController,
                   onChanged: (query) {
-                    context.read<FavoritesCubit>().searchFavorites(query);
+                    _favoritesCubit.searchFavorites(query);
                   },
                   hintText: 'Buscar nos favoritos...',
                 ),
@@ -63,43 +67,46 @@ class _PersistedUsersPageState extends State<PersistedUsersPage> {
         },
         body: SafeArea(
           top: false,
-          child: BlocBuilder<FavoritesCubit, FavoritesState>(
-            builder: (context, state) {
-              if (state is FavoritesInitial) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (state is FavoritesError) {
-                return _buildError(context, state.message);
-              }
-
-              if (state is FavoritesSuccess) {
-                if (state.allFavorites.isEmpty) {
-                  return _buildEmpty(context);
+          child: BlocProvider.value(
+            value: _favoritesCubit,
+            child: BlocBuilder<FavoritesCubit, FavoritesState>(
+              builder: (context, state) {
+                if (state is FavoritesInitial) {
+                  return const Center(child: CircularProgressIndicator());
                 }
 
-                if (state.filteredFavorites.isEmpty) {
-                  return _buildNoResults(context);
+                if (state is FavoritesError) {
+                  return _buildError(context, state.message);
                 }
 
-                return ListView.builder(
-                  padding: pagePadding,
-                  itemCount: state.filteredFavorites.length,
-                  itemBuilder: (context, index) {
-                    final user = state.filteredFavorites[index];
-                    final heroTag = 'favorite_${user.uuid}';
-                    return FavoriteProfileTile(
-                      user: user,
-                      heroTag: heroTag,
-                      onTap: () => _navigateToDetails(context, user, heroTag),
-                      onRemove: () => _removeFavorite(context, user),
-                    );
-                  },
-                );
-              }
+                if (state is FavoritesSuccess) {
+                  if (state.allFavorites.isEmpty) {
+                    return _buildEmpty(context);
+                  }
 
-              return const Center(child: Text('Estado desconhecido'));
-            },
+                  if (state.filteredFavorites.isEmpty) {
+                    return _buildNoResults(context);
+                  }
+
+                  return ListView.builder(
+                    padding: pagePadding,
+                    itemCount: state.filteredFavorites.length,
+                    itemBuilder: (context, index) {
+                      final user = state.filteredFavorites[index];
+                      final heroTag = 'favorite_${user.uuid}';
+                      return FavoriteProfileTile(
+                        user: user,
+                        heroTag: heroTag,
+                        onTap: () => _navigateToDetails(context, user, heroTag),
+                        onRemove: () => _removeFavorite(context, user),
+                      );
+                    },
+                  );
+                }
+
+                return const Center(child: Text('Estado desconhecido'));
+              },
+            ),
           ),
         ),
       ),
@@ -120,10 +127,7 @@ class _PersistedUsersPageState extends State<PersistedUsersPage> {
             gapH8,
             Text(message, style: AppTextStyles.getInfoLabelStyle(textTheme), textAlign: TextAlign.center),
             gapH24,
-            FilledButton(
-              onPressed: () => context.read<FavoritesCubit>().loadFavorites(),
-              child: const Text('Tentar novamente'),
-            ),
+            FilledButton(onPressed: () => _favoritesCubit.loadFavorites(), child: const Text('Tentar novamente')),
           ],
         ),
       ),
@@ -181,7 +185,7 @@ class _PersistedUsersPageState extends State<PersistedUsersPage> {
       context,
       MaterialPageRoute(
         builder: (_) => BlocProvider.value(
-          value: context.read<FavoritesCubit>(),
+          value: _favoritesCubit,
           child: DetailsPage(user: user, heroTag: heroTag),
         ),
       ),
@@ -189,7 +193,7 @@ class _PersistedUsersPageState extends State<PersistedUsersPage> {
   }
 
   void _removeFavorite(BuildContext context, User user) {
-    context.read<FavoritesCubit>().removeFavorite(user.uuid);
+    _favoritesCubit.removeFavorite(user.uuid);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('${user.firstName} removido dos favoritos'),

@@ -28,6 +28,11 @@ class FavoritesCubit extends Cubit<FavoritesState> {
   ) : super(FavoritesInitial());
 
   Future<void> _ensureFavoritesLoaded() async {
+    if (state is FavoritesSuccess) {
+      _isLoaded = true;
+      return;
+    }
+
     if (!_isLoaded || state is FavoritesError) {
       await loadFavorites();
     }
@@ -38,8 +43,9 @@ class FavoritesCubit extends Cubit<FavoritesState> {
 
     if (state is! FavoritesSuccess) return;
     final currentState = state as FavoritesSuccess;
-
-    if (currentState.allFavorites.any((u) => u.uuid == user.uuid)) return;
+    if (currentState.allFavorites.any((u) => u.uuid == user.uuid)) {
+      return;
+    }
 
     final newAllList = List<User>.from(currentState.allFavorites)..add(user);
     newAllList.sort((a, b) => a.firstName.compareTo(b.firstName));
@@ -52,6 +58,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       await _addFavoritesUseCase(user);
     } catch (e) {
       emit(FavoritesError("Failed to add favorite: $e"));
+
       emit(currentState);
     }
   }
@@ -72,6 +79,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       await _removeFavoritesUseCase(userId);
     } catch (e) {
       emit(FavoritesError("Failed to remove favorite: $e"));
+
       emit(currentState);
     }
   }
@@ -89,6 +97,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       _isLoaded = true;
       emit(FavoritesSuccess(allFavorites: favorites, filteredFavorites: favorites));
     } catch (e) {
+      _isLoaded = false;
       emit(FavoritesError("Failed to load favorites: $e"));
     }
   }
@@ -104,5 +113,14 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     );
 
     emit(currentState.copyWith(filteredFavorites: filteredList));
+  }
+
+  void resetSearch() {
+    if (state is! FavoritesSuccess) return;
+
+    _currentQuery = '';
+    final currentState = state as FavoritesSuccess;
+
+    emit(currentState.copyWith(filteredFavorites: currentState.allFavorites));
   }
 }

@@ -20,6 +20,9 @@ class HomePageCubit extends Cubit<HomeState> {
   HomePageCubit(this._fetchNewUserUseCase, this._searchHomeUseCase) : super(HomeInitial());
 
   void startFetchingUsers(TickerProvider tickerProvider) async {
+    if (_ticker != null && _ticker!.isActive) {
+      return;
+    }
     _ticker?.dispose();
     await getNextUser();
     _ticker = tickerProvider.createTicker((elapsed) async {
@@ -65,15 +68,14 @@ class HomePageCubit extends Cubit<HomeState> {
 
     final currentState = state as HomeSuccess;
 
-    if (query.isEmpty) {
-      startFetchingUsers(tickerProvider);
-    } else {
-      stopFetchingUsers();
-    }
-
     final newFilteredList = _searchHomeUseCase(SearchHomeParams(allUsers: currentState.allUsers, query: _currentQuery));
 
     emit(currentState.copyWith(filteredUsers: newFilteredList));
+  }
+
+  Future<void> resetSearch(TickerProvider tickerProvider) async {
+    _currentQuery = '';
+    searchUsers(_currentQuery, tickerProvider);
   }
 
   @override

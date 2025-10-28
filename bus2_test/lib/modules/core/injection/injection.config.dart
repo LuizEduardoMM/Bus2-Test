@@ -1,5 +1,5 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format width=80
+// GENERATED CODE - DO NOT MODIFY BY HAND
 
 // **************************************************************************
 // InjectableConfigGenerator
@@ -38,10 +38,10 @@ _i174.GetIt $initGetIt(
 }) {
   final gh = _i526.GetItHelper(getIt, environment, environmentFilter);
   final registerModule = _$RegisterModule();
+  gh.factory<_i624.SearchHomeUseCase>(() => _i624.SearchHomeUseCase());
   gh.factory<_i611.SearchFavoritesUseCase>(
     () => _i611.SearchFavoritesUseCase(),
   );
-  gh.factory<_i624.SearchHomeUseCase>(() => _i624.SearchHomeUseCase());
   gh.lazySingleton<_i361.Dio>(() => registerModule.dio);
   gh.singleton<_i1025.HomePageDatasource>(
     () => _i1025.HomePageDatasourceImpl(gh<_i361.Dio>()),
@@ -61,11 +61,11 @@ _i174.GetIt $initGetIt(
   gh.factory<_i86.AddFavoritesUseCase>(
     () => _i86.AddFavoritesUseCase(gh<_i90.FavoritesRepository>()),
   );
-  gh.factory<_i1044.GetFavoritesUseCase>(
-    () => _i1044.GetFavoritesUseCase(gh<_i90.FavoritesRepository>()),
-  );
   gh.factory<_i382.RemoveFavoritesUseCase>(
     () => _i382.RemoveFavoritesUseCase(gh<_i90.FavoritesRepository>()),
+  );
+  gh.factory<_i1044.GetFavoritesUseCase>(
+    () => _i1044.GetFavoritesUseCase(gh<_i90.FavoritesRepository>()),
   );
   gh.singleton<_i317.FavoritesCubit>(
     () => _i317.FavoritesCubit(

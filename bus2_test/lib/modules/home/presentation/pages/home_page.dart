@@ -21,19 +21,42 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final _searchController = TextEditingController();
+  final _homePageCubit = getIt<HomePageCubit>();
+  bool _wasVisible = true;
+  bool _hasInitialized = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<HomePageCubit>().startFetchingUsers(this);
+      if (!_hasInitialized) {
+        _hasInitialized = true;
+        _homePageCubit.startFetchingUsers(this);
+      }
     });
-    _searchController.addListener(() => setState(() {}));
+    _searchController.addListener(() {
+      _homePageCubit.searchUsers(_searchController.text, this);
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final isCurrentRoute = ModalRoute.of(context)?.isCurrent ?? false;
+
+    if (!_wasVisible && isCurrentRoute) {
+      _searchController.clear();
+      _homePageCubit.resetSearch(this);
+      FocusManager.instance.primaryFocus?.unfocus();
+    }
+
+    _wasVisible = isCurrentRoute;
   }
 
   @override
   void dispose() {
-    context.read<HomePageCubit>().stopFetchingUsers();
+    _homePageCubit.stopFetchingUsers();
     _searchController.dispose();
     super.dispose();
   }
@@ -57,13 +80,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   icon: const Icon(Icons.storage_rounded),
                   tooltip: 'Usuários Salvos',
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            BlocProvider.value(value: getIt<FavoritesCubit>(), child: const PersistedUsersPage()),
-                      ),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const PersistedUsersPage()));
                   },
                 ),
               ],
@@ -72,7 +89,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: SearchField(
                   controller: _searchController,
                   onChanged: (query) {
-                    context.read<HomePageCubit>().searchUsers(query, this);
+                    _homePageCubit.searchUsers(query, this);
                   },
                   hintText: 'Buscar usuários...',
                 ),
@@ -171,7 +188,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Text(message, style: AppTextStyles.getInfoLabelStyle(textTheme), textAlign: TextAlign.center),
             gapH24,
             FilledButton(
-              onPressed: () => context.read<HomePageCubit>().startFetchingUsers(this),
+              onPressed: () => _homePageCubit.startFetchingUsers(this),
               child: const Text('Tentar novamente'),
             ),
           ],
