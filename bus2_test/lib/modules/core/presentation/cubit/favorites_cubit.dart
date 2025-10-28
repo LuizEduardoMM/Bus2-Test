@@ -17,6 +17,9 @@ class FavoritesCubit extends Cubit<FavoritesState> {
   final RemoveFavoritesUseCase _removeFavoritesUseCase;
   final SearchFavoritesUseCase _searchFavoritesUseCase;
 
+  String _currentQuery = '';
+  bool _isLoaded = false;
+
   FavoritesCubit(
     this._addFavoritesUseCase,
     this._getFavoritesUseCase,
@@ -24,12 +27,26 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     this._searchFavoritesUseCase,
   ) : super(FavoritesInitial());
 
-  Future<void> addFavorite(User user) async {
-    final currentState = state as FavoritesSuccess;
-    final newList = List<User>.from(currentState.allFavorites)..add(user);
-    newList.sort((a, b) => a.firstName.compareTo(b.firstName));
+  Future<void> _ensureFavoritesLoaded() async {
+    if (!_isLoaded || state is FavoritesError) {
+      await loadFavorites();
+    }
+  }
 
-    emit(FavoritesSuccess(allFavorites: newList, filteredFavorites: newList));
+  Future<void> addFavorite(User user) async {
+    await _ensureFavoritesLoaded();
+
+    if (state is! FavoritesSuccess) return;
+    final currentState = state as FavoritesSuccess;
+
+    if (currentState.allFavorites.any((u) => u.uuid == user.uuid)) return;
+
+    final newAllList = List<User>.from(currentState.allFavorites)..add(user);
+    newAllList.sort((a, b) => a.firstName.compareTo(b.firstName));
+
+    final newFilteredList = _searchFavoritesUseCase(SearchFavoritesParams(favorites: newAllList, query: _currentQuery));
+
+    emit(FavoritesSuccess(allFavorites: newAllList, filteredFavorites: newFilteredList));
 
     try {
       await _addFavoritesUseCase(user);
@@ -40,10 +57,16 @@ class FavoritesCubit extends Cubit<FavoritesState> {
   }
 
   Future<void> removeFavorite(String userId) async {
-    final currentState = state as FavoritesSuccess;
-    final newList = List<User>.from(currentState.allFavorites)..removeWhere((u) => u.uuid == userId);
+    await _ensureFavoritesLoaded();
 
-    emit(FavoritesSuccess(allFavorites: newList, filteredFavorites: newList));
+    if (state is! FavoritesSuccess) return;
+    final currentState = state as FavoritesSuccess;
+
+    final newAllList = List<User>.from(currentState.allFavorites)..removeWhere((u) => u.uuid == userId);
+
+    final newFilteredList = _searchFavoritesUseCase(SearchFavoritesParams(favorites: newAllList, query: _currentQuery));
+
+    emit(FavoritesSuccess(allFavorites: newAllList, filteredFavorites: newFilteredList));
 
     try {
       await _removeFavoritesUseCase(userId);
@@ -53,11 +76,17 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     }
   }
 
-  Future<void> loadFavorites() async {
+  Future<void> loadFavorites({bool forceRefresh = false}) async {
+    if (_isLoaded && state is FavoritesSuccess && !forceRefresh) {
+      return;
+    }
+
     try {
       final favorites = await _getFavoritesUseCase();
       favorites.sort((a, b) => a.firstName.compareTo(b.firstName));
 
+      _currentQuery = '';
+      _isLoaded = true;
       emit(FavoritesSuccess(allFavorites: favorites, filteredFavorites: favorites));
     } catch (e) {
       emit(FavoritesError("Failed to load favorites: $e"));
@@ -67,10 +96,11 @@ class FavoritesCubit extends Cubit<FavoritesState> {
   void searchFavorites(String query) {
     if (state is! FavoritesSuccess) return;
 
+    _currentQuery = query;
     final currentState = state as FavoritesSuccess;
 
     final filteredList = _searchFavoritesUseCase(
-      SearchFavoritesParams(favorites: currentState.allFavorites, query: query),
+      SearchFavoritesParams(favorites: currentState.allFavorites, query: _currentQuery),
     );
 
     emit(currentState.copyWith(filteredFavorites: filteredList));

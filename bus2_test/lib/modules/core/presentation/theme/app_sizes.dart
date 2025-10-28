@@ -36,6 +36,7 @@ const double iconSizeMedium = 28.0;
 const double iconSizeTitle = 20.0;
 
 const double avatarRadius = 60.0;
+const double avatarRadiusLandscape = 40.0;
 const double avatarFavoriteRadius = 34.0;
 const double borderSmall = 2.0;
 const double borderMedium = 1.5;
