@@ -79,15 +79,15 @@ flutter test --coverage
 
 ## 📊 Testes
 
-Total de **69 testes** com cobertura completa:
+Total de **63 testes** com cobertura completa:
 
 | Componente | Testes | Descrição |
 |-----------|--------|-----------|
-| **FavoritesCubit** | 16 | State management de favoritos (add, remove, search, load) |
-| **HomePageCubit** | 11 | State management de busca de usuários |
-| **SearchFavoritesUseCase** | 18 | Lógica de filtro por nome e email |
-| **SharedPreferencesService** | 11 | Persistência local de favoritos |
-| **HomePageDatasource** | 13 | Integração com RandomUser API |
+| **FavoritesCubit** | 17 | State management de favoritos (add, remove, search, load) |
+| **HomePageCubit** | 12 | State management de busca de usuários |
+| **SearchFavoritesUseCase** | 15 | Lógica de filtro por nome e email |
+| **SharedPreferencesService** | 10 | Persistência local de favoritos |
+| **HomePageDatasource** | 9 | Integração com RandomUser API |
 
 ### Status dos Testes
 ```
@@ -102,7 +102,7 @@ Total de **69 testes** com cobertura completa:
 
 ### Detalhes dos Testes
 
-#### FavoritesCubit (16 testes)
+#### FavoritesCubit 
 - ✅ Load, add, remove favoritos
 - ✅ Search com query
 - ✅ Proteção contra duplicatas
@@ -111,7 +111,7 @@ Total de **69 testes** com cobertura completa:
 - ✅ Estado vazio
 - ✅ Retry após erro
 
-#### HomePageCubit (11 testes)
+#### HomePageCubit 
 - ✅ Fetch automático de usuários
 - ✅ Search em tempo real
 - ✅ Filtro mantendo allUsers
@@ -120,7 +120,7 @@ Total de **69 testes** com cobertura completa:
 - ✅ Persistência de query
 - ✅ Error handling
 
-#### SearchFavoritesUseCase (18 testes)
+#### SearchFavoritesUseCase 
 - ✅ Filtro por firstName, lastName, email
 - ✅ Case-insensitive
 - ✅ Query vazia retorna tudo
@@ -129,7 +129,7 @@ Total de **69 testes** com cobertura completa:
 - ✅ Espaços em query
 - ✅ Ordem dos resultados
 
-#### SharedPreferencesService (11 testes)
+#### SharedPreferencesService  
 - ✅ Salvar favorito
 - ✅ Rejeitar duplicado
 - ✅ Remover favorito
@@ -138,7 +138,7 @@ Total de **69 testes** com cobertura completa:
 - ✅ Handle ID inexistente
 - ✅ Remover último
 
-#### HomePageDatasource (13 testes)
+#### HomePageDatasource  
 - ✅ Parse correto de JSON
 - ✅ Retorna UserModel
 - ✅ Error handling (status code, lista vazia)
