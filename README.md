@@ -89,15 +89,7 @@ Total de **63 testes** com cobertura completa:
 | **SharedPreferencesService** | 10 | Persistência local de favoritos |
 | **HomePageDatasource** | 9 | Integração com RandomUser API |
 
-### Status dos Testes
-```
-✅ FavoritesCubit - 16/16 testes passando
-✅ HomePageCubit - 11/11 testes passando
-✅ SearchFavoritesUseCase - 18/18 testes passando
-✅ SharedPreferencesService - 11/11 testes passando
-✅ HomePageDatasource - 13/13 testes passando
 
-📊 Total: 69/69 testes passando (100%)
 ```
 
 ### Detalhes dos Testes
